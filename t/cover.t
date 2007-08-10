@@ -121,18 +121,20 @@ ok( $n{-1234}**11,          c(-(1234**11)), 'n1234**11 eq -(1234**11)' ); #75#
 # aka 1.79769313486231574e308/log(10)
 ok( $n{'1e+400'}**1e305,    "1e+4e+307",    'huge**1e305 eq 1e4e307' );   #76#
 
-# This would fail on a system with bigger-than-typical "double" data type:
-#ok($n{'1e+400'}**2e305,    exp(1e300),     'huge**2e305 eq inf' );
+# abs() only because of buggy Perl environments where exp(1e300) is -inf:
+my $inf= abs( exp(1e300) );
 
-ok( ($n{'1e+400'}**1e300)**1e300,
-                            exp(1e300),     'huge**1e300**1e300 eq inf' );#77#
+# This would fail on a system with bigger-than-typical "double" data type:
+#ok($n{'1e+400'}**2e305,    $inf,           'huge**2e305 eq inf' );
+
+ok( ($n{'1e+400'}**1e300)**1e300, $inf,     'huge**1e300**1e300 eq inf' );#77#
 
 my $notzero= $n{-1e-100}**9e305;
 ok( $notzero,           0,                  'tiny**9e305 eq 0' );         #78#
 # TBD:  Perhaps $notzero should be a real zero?
 # Or perhaps 1/0 should always return infinity rather than dying?
-ok( 1/$notzero,         exp(1e300),         '1/notzero eq inf' );         #79#
-ok( 1/-$notzero,        -exp(1e300),        '1/notzero eq -inf' );        #80#
+ok( 1/$notzero,         $inf,               '1/notzero eq inf' );         #79#
+ok( 1/-$notzero,        -$inf,              '1/notzero eq -inf' );        #80#
 
 # Product of sequence
 my $deals= 48^$n{52};
@@ -212,9 +214,9 @@ ok( NV($n{-1}),             -1,             'NV neg eq -1' );             #141#
 ok( NV($n{52}),             52,             'NV cards eq 52' );           #142#
 ok( NV($n{-0.1}),           -0.1,           'NV tenth eq -0.1' );         #143#
 ok( NV($n{-1234}),          -1234,          'NV n1234 eq -1234' );        #144#
-ok( NV($n{1e+100}**100),    exp(1e100),     'NV big**100 eq inf' );       #145#
+ok( NV($n{1e+100}**100),    $inf,           'NV big**100 eq inf' );       #145#
 ok( NV($n{-1e-100}**100),   0,              'NV tiny**100 eq 0' );        #146#
-ok( NV(1/$n{-1e-100}**101), -exp(1e100),    'NV tiny**-100 eq -inf' );    #147#
+ok( NV(1/$n{-1e-100}**101), -$inf,          'NV tiny**-100 eq -inf' );    #147#
 
 # Stringification (covered in previous cases)
 

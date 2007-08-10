@@ -5,7 +5,7 @@ use POSIX qw( floor );
 
 use vars qw( $VERSION @EXPORT_OK );
 BEGIN {
-    $VERSION= 0.001_003;
+    $VERSION= 0.001_004;
 
     require Exporter;
     *import= \&Exporter::import;
@@ -262,7 +262,12 @@ use vars qw( $SigDigs );
 # Automatically figure out how many significant digits are in
 # an NV on this platform (minus 1 for decmical point, minus
 # another two just because our calculations lose some precision):
-BEGIN{ $SigDigs= length( 10 / 7 ) - 3; }
+BEGIN {
+    $SigDigs= length( 10 / 7 ) - 3;
+    # Long doubles leave $SigDigs set too high:
+    $SigDigs -= 2
+        if  14 < $SigDigs;
+}
 
 sub _str
 {
