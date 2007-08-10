@@ -5,7 +5,7 @@ use POSIX qw( floor );
 
 use vars qw( $VERSION @EXPORT_OK );
 BEGIN {
-    $VERSION= 0.001_001;
+    $VERSION= 0.001_002;
 
     require Exporter;
     *import= \&Exporter::import;
@@ -350,34 +350,34 @@ further calculations).
 
 =head2 Methods
 
-=item C<new>
+=head3 C<new>
 
     my $six= Math::Approx->new( 6 );
     my $halfdozen= $six->new();     # Makes a copy
     my $ten= $six->new( 10 );       # Convenient short-hand
 
-=item C<Get>
+=head3 C<Get>
 
-In a scalar context, C<$x->Get()> returns "0" if C<$x==0>, otherwise
+In a scalar context, C<< $x->Get() >> returns "0" if C<$x==0>, otherwise
 C<log(abs($x))>.  The return value is a simple Perl (floating-point) number,
 not a Math::BigApprox object.
 
-In a list context, C<$x->Get()> returns two scalar: the above value followed
-by C<$x->Sign()>.
+In a list context, C<< $x->Get() >> returns two scalar: the above value
+followed by C<< $x->Sign() >>.
 
-=item C<Sign>
+=head3 C<Sign>
 
-C<$x->Sign()> returns "-1" if C<$x < 0>, "0" if C<$x == 0>, and "1" if
+C<< $x->Sign() >> returns "-1" if C<$x < 0>, "0" if C<$x == 0>, and "1" if
 C<0 < $x>.
 
-C<$x->Sign($y)> sets the sign of $x to match the sign of $y.  $y doesn't
+C<< $x->Sign($y) >> sets the sign of $x to match the sign of $y.  $y doesn't
 have to be a plain Perl number or a Math::BigApprox number object; it can
 be anything that can be used in C<0<$y> and C<0==$y>.  The previous value
 of the sign is returned.
 
 =head2 Operations
 
-=item C<+>, C<->, C<*>, C</>, C<**>
+=head3 C<+>, C<->, C<*>, C</>, C<**>
 
 The basic arithmatic operations (including unary "-", negation) serve the
 traditional purposes, returning a new, overloaded Math::BigApprox object.
@@ -385,19 +385,19 @@ traditional purposes, returning a new, overloaded Math::BigApprox object.
 Of course, C<$x**0> is "1" (even for C<$x==0>) while C<0**$x> is "0" (unless
 C<$x==0>).
 
-=item C< << >, C<<< >> >>>
+=head3 C< << >, C<<< >> >>>
 
 C< $x << $y > calculates C<$x * 2**$y>.
 C<<< $x >> $y >>> calculates C<$x / 2**$y>.  Both return Math::BigApprox
 number objects.
 
-=item C<!>
+=head3 C<!>
 
 Logical negation has been usurped to perform factorial.  It being a unary
 operation even means its precedence is reasonable for such a use, binding
 tighter than the arithmatic operations so C<!$x/!$y> works as expected.
 
-=item C<^>
+=head3 C<^>
 
 Bit-wise xor has been usurped to perform the product of a series.
 C<1^$x> is the same as C<!$x>, that is, C<1*2*3*...*$x>.  C<$x^$y> is
@@ -410,7 +410,7 @@ Note that C<^> binds very losely so C<$x+1 ^ 2*$y> works as expected but
 C<$x^$y / !$z> really means C<$x ^ ($y/!$z)> and so needs to be written
 as C<($x^$y) / !$z>.
 
-=item C<< <=> >>
+=head3 C<< <=> >>
 
 All of the numerical comparison operators work in the traditional manner,
 comparing the values.  Only C<< <=> >> is specifically overloaded but
@@ -421,14 +421,14 @@ the same string representation (like C<eq>).  This avoids some of the
 pitfalls of using C<==> on floating-point values.  So C<==> really means
 "approximately numerically equal".
 
-=item C<abs>, C<log>, C<sqrt>
+=head3 C<abs>, C<log>, C<sqrt>
 
 These math functions work in the traditional manner.  C<log($x)> returns
 an ordinary number, not a Math::BigApprox number, and dies if C<$x> is not
 positive [see also Get()].  C<abs($x)> and C<sqrt($x)> return Math::BigApprox
 number objects (when $x is a Math::BigApprox object).
 
-=item C<"">
+=head3 C<"">
 
 Math::BigApprox values are displayed (stringified) mostly like oridinary
 Perl numbers, using simple decimal notation for mundane values ("-45.3")
@@ -436,13 +436,10 @@ and scientific notation for huge and tiny values ("-2.687e-97").  For
 obscenely huge/tiny values, a "double scientific notation" format is
 used ("1e2.68e213").
 
-Currently, the number of significant digits is not properly determined,
-especially for obscenely huge/tiny values.
-
 Note that Math::BigApprox doesn't overload string concatenation (C<.>),
 so C<''.$x> stringifies $x just like C<"$x">.
 
-=item C<0+>
+=head3 C<0+>
 
 Using a Math:BigApprox number object in a way that requires a simple numeric
 value attempts to compute a simple number.  If the number is too tiny, then
@@ -461,7 +458,7 @@ Note that, despite the name used by overload.pm, C<0+$x> doesn't return a
 simple number; it returns a Math::BigApprox number object (when $x is such),
 a copy of $x.
 
-=item Boolean
+=head3 Boolean
 
 Using a Math::BigApprox alone as a Boolean expression is a fatal error.  This
 is to help prevent accidental attempts to use C<!> as "Boolean not".
@@ -473,7 +470,7 @@ is to help prevent accidental attempts to use C<!> as "Boolean not".
     if(  0 != !$x  ) {  # What the above really means
     if(  0 == $x  ) {   # What to use instead
 
-=item Other
+=head3 Other
 
 Any other operations such as other Boolean or bit-wise operations are not
 supported and using them may cause strange things to happen.  Some of these
@@ -489,18 +486,18 @@ rarely make sense to use on really huge numbers).
 
 The following fuctions can optionally be exported.
 
-=item C<c>
+=head3 C<c>
 
-C<c($num)> is just short-hand for C<Math::BigApprox->new($num)>.  "c" is a
-standard abbreviate for "circa" which means "approximate".
+C<c($num)> is just short-hand for C<< Math::BigApprox->new($num) >>.
+"c" is a standard abbreviate for "circa" which means "approximate".
 
-=item C<Fact>
+=head3 C<Fact>
 
 C<Fact($n)> returns the factorial of $n.  Here $n is a regular Perl number
 rather than a Math::BigApprox number object, which allows the computation
 to be done slightly more efficiently than C<!c($n)>.
 
-=item C<Prod>
+=head3 C<Prod>
 
 C<Prod($from,$to)> returns the product of the numbers in the range
 C<$from..$to>.  $from and $to are a regular Perl numbers rather than
@@ -509,8 +506,8 @@ slightly more efficiently than C<c($from) ^ c($to)>.
 
 =head1 FUTURE IDEAS
 
-Add an c<< $x->e($y) >> method that multiples $x by 10**$y and a c'tor
-that takes a separate significand and base-10 exponent.
+Add an C<< $x->e($y) >> method that multiples C<$x> by C<10**$y> and a
+c'tor that takes a separate significand and base-10 exponent.
 
 =head1 SHORTCOMINGS
 

@@ -1,4 +1,7 @@
 Revision history for Perl extension Math::BigApprox
 
+0.001_002   2007-08-09
+  - Minor POD improvements.
+
 0.001_001   2007-08-08
   - Initial release to CPAN.
