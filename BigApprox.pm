@@ -5,7 +5,7 @@ use POSIX qw( floor );
 
 use vars qw( $VERSION @EXPORT_OK );
 BEGIN {
-    $VERSION= 0.001_002;
+    $VERSION= 0.001_003;
 
     require Exporter;
     *import= \&Exporter::import;
@@ -259,10 +259,10 @@ sub _num
 }
 
 use vars qw( $SigDigs );
-# Automatically figure out how many significant digits are
-# in an NV on this platform (minus 1 for decmical point, minus
-# another just because our calculations lose some precision):
-BEGIN{ $SigDigs= length( 10 / 7 ) - 2; }
+# Automatically figure out how many significant digits are in
+# an NV on this platform (minus 1 for decmical point, minus
+# another two just because our calculations lose some precision):
+BEGIN{ $SigDigs= length( 10 / 7 ) - 3; }
 
 sub _str
 {
@@ -280,7 +280,7 @@ sub _str
     $mant= 1
         if  2*$mant == $mant;
     $exp= "+$exp"
-        if  0 <= $exp;
+        if  $exp !~ /^-/;
     my $digs= $SigDigs - length($exp);
     $mant= sprintf "%s%.*f", $x->[1] < 0 ? '-' : '', $digs-1, $mant;
     $mant =~ s/[.]?0+$//;
@@ -362,7 +362,7 @@ In a scalar context, C<< $x->Get() >> returns "0" if C<$x==0>, otherwise
 C<log(abs($x))>.  The return value is a simple Perl (floating-point) number,
 not a Math::BigApprox object.
 
-In a list context, C<< $x->Get() >> returns two scalar: the above value
+In a list context, C<< $x->Get() >> returns two scalars: the above value
 followed by C<< $x->Sign() >>.
 
 =head3 C<Sign>
@@ -385,11 +385,19 @@ traditional purposes, returning a new, overloaded Math::BigApprox object.
 Of course, C<$x**0> is "1" (even for C<$x==0>) while C<0**$x> is "0" (unless
 C<$x==0>).
 
-=head3 C< << >, C<<< >> >>>
+Note that overload.pm handles expressions like C<10**$x> where $x is a
+Math::BigApprox number object or even C<1+$x>, so you don't have to convert
+all parts of an expression into Math::BigApprox objects, nor even the first
+term in the expression.
+
+=head3 C< <<>, C<<< >> >>>
 
 C< $x << $y > calculates C<$x * 2**$y>.
-C<<< $x >> $y >>> calculates C<$x / 2**$y>.  Both return Math::BigApprox
-number objects.
+
+C<<< $x >> $y >>> calculates C<$x / 2**$y>.
+
+Each returns a Math::BigApprox number object.  Note that C<$y> doesn't have
+to be an integer (nor positive).
 
 =head3 C<!>
 

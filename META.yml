@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Math-BigApprox
-version:             0.001002
+version:             0.001003
 abstract:            Fast and small way to closely approximate very large values.
 license:             unknown
 generated_by:        ExtUtils::MakeMaker version 6.30_01

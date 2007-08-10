@@ -1,5 +1,10 @@
 Revision history for Perl extension Math::BigApprox
 
+0.001_003   2007-08-10
+  - Minor changes to fix test suite failures.
+  - Make t/cover.t source prettier (easier to locate tests by number).
+  - Trivial POD improvements.
+
 0.001_002   2007-08-09
   - Minor POD improvements.
 
