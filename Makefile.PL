@@ -7,9 +7,6 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'              => 'Math::BigApprox',
     'VERSION_FROM'      => 'BigApprox.pm',
-    'PREREQ_PM'         => {
-        'POSIX' => 0,   # For floor()
-    },
     (  $] < 5.005  ?  ()  :
     ( 'AUTHOR'          => 'Tye McQueen',
       'ABSTRACT_FROM'   => 'BigApprox.pm' )

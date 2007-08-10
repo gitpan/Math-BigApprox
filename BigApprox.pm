@@ -1,15 +1,28 @@
 package Math::BigApprox;
 use strict;
 
-use POSIX qw( floor );
+# use POSIX qw( floor );    # Maybe, maybe not.
 
 use vars qw( $VERSION @EXPORT_OK );
 BEGIN {
-    $VERSION= 0.001_004;
+    $VERSION= 0.001_005;
 
     require Exporter;
     *import= \&Exporter::import;
-    @EXPORT_OK= qw( c Fact Prod );
+    @EXPORT_OK= qw( c Fact Prod $SigDigs );
+
+    my $useFloor= 0;
+    if(  eval { require POSIX; 1 }  ) {
+        # On "long double" Perls, POSIX::floor converts to "double"
+        $useFloor=  "4e+102" eq POSIX::floor(4e102);
+    }
+    if(  $useFloor  ) {
+        *_floor= \&POSIX::floor;
+    } else {
+        *_floor= sub {
+            return  $_[0] < 0  ?  -int(-$_[0])  :  int($_[0]);
+        };
+    }
 }
 
 use overload(
@@ -258,15 +271,28 @@ sub _num
     return $x->[1] * exp( $x->[0] );
 }
 
-use vars qw( $SigDigs );
-# Automatically figure out how many significant digits are in
-# an NV on this platform (minus 1 for decmical point, minus
-# another two just because our calculations lose some precision):
+use vars qw( $SigDigs $FloorMag $LenMag );
+# Figure out how many significant digits are in an NV on this platform:
 BEGIN {
-    $SigDigs= length( 10 / 7 ) - 3;
-    # Long doubles leave $SigDigs set too high:
-    $SigDigs -= 2
+
+    # Cheap trick to get at how many sig digs Perl figured out it has:
+    $SigDigs= length( 10 / 7 );
+
+    # Don't call floor() on numbers larger than this, since they can't
+    # have a factional part [and floor(4e102) can substract 8e80!]
+    $FloorMag= "1e" . $SigDigs;
+
+    # Minus 1 for decmical point, minus another two just
+    # because our calculations lose some precision:
+    $SigDigs -= 3;
+
+    # Long doubles leave $SigDigs set too high (probably
+    # not all C RTL calls are fully long-double-using):
+    $SigDigs -= 3
         if  14 < $SigDigs;
+
+    # Don't us length() to measure magnitude on numbers larger than this:
+    $LenMag= "1e" . $SigDigs;
 }
 
 sub _str
@@ -280,13 +306,17 @@ sub _str
             if  $exp < 0;
         return $x->[1] * $exp;
     }
-    $exp= floor( sprintf "%.*g", $SigDigs-1, $exp );
+    $exp= sprintf "%.*g", $SigDigs-1, $exp;
+    $exp= _floor( $exp )
+        if  abs($exp) < $FloorMag;
     my $mant= exp( $x->[0] - log(10)*$exp );
-    $mant= 1
+    $mant=  1
         if  2*$mant == $mant;
     $exp= "+$exp"
         if  $exp !~ /^-/;
-    my $digs= $SigDigs - length($exp);
+    my $digs=  $LenMag <= abs($exp)  ?  1  :  $SigDigs - length($exp);
+    $digs= 1
+        if  $digs < 1;
     $mant= sprintf "%s%.*f", $x->[1] < 0 ? '-' : '', $digs-1, $mant;
     $mant =~ s/[.]?0+$//;
     $mant .=  0==$exp  ?  ""  :  "e" . $exp;

@@ -20,10 +20,9 @@ ok( NV(0.1),    0.1,    'NV(0.1) eq 0.1' );                               #1#
 require Math::BigApprox;
 ok(1);                                                                    #2#
 
-Math::BigApprox->import( qw( c Prod Fact ) );
+Math::BigApprox->import( qw( c Prod Fact $SigDigs ) );
 ok(1);                                                                    #3#
-print "# Note:  SigDigs == $Math::BigApprox::SigDigs\n";
-$Math::BigApprox::SigDigs ||= 0;    # No-op to prevent "used once" warning
+eval 'print STDERR "# Note:  SigDigs == $SigDigs\n";';
 
 my %n;
 for(
